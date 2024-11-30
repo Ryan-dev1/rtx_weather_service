@@ -38,4 +38,3 @@ jobs:
         with:
           name: log-file
           path: log.txt
-

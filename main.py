@@ -61,12 +61,12 @@ def rtx_weather_report(request):
     engine = pyttsx3.init()
     engine.save_to_file(full_report, 'weather_report.wav')
     engine.runAndWait()
-    print("WAV file created!")  # Added this line
+    print("WAV file created!")
 
     try:
         sound = AudioSegment.from_wav("weather_report.wav")
         sound.export("weather_report.mp3", format="mp3")
-        print("MP3 file created successfully!")  # Added this line
+        print("MP3 file created successfully!")
     except Exception as e:
         print(f"An error occurred during conversion: {e}")
 
@@ -77,16 +77,20 @@ def rtx_weather_report(request):
         files = {
             'file': open(file_path, 'rb')
         }
-        response = requests.post(
-            f'{url}/api/station/{station_id}/files/upload',
-            headers=headers,
-            files=files
-        )
-        if response.status_code == 200:
-            print('File uploaded successfully to AzuraCast!')
-        else:
-            print(f'Failed to upload file. Status code: {response.status_code}, Message: {response.text}')
-        print(response.text)  # Added this line
+        print(f"Uploading {file_path} to AzuraCast...")
+        try:
+            response = requests.post(
+                f'{url}/api/station/{station_id}/files/upload',
+                headers=headers,
+                files=files
+            )
+            if response.status_code == 200:
+                print('File uploaded successfully to AzuraCast!')
+            else:
+                print(f'Failed to upload file. Status code: {response.status_code}, Message: {response.text}')
+        except Exception as e:
+            print(f"An error occurred during the upload: {e}")
 
     upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'weather_report.mp3')
     return 'Weather report generated and uploaded successfully!'
+

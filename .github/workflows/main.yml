@@ -1,9 +1,8 @@
 name: Run Script
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '0 * * * *'  # Runs every hour
 
 jobs:
   build:
@@ -12,6 +11,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -25,3 +29,4 @@ jobs:
 
       - name: Run script
         run: python main.py
+

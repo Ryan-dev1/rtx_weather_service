@@ -43,6 +43,12 @@ def rtx_weather_report(request):
     }
     weather_reports = []
 
+    log_file = open('log.txt', 'w')
+
+    def log_message(message):
+        print(message)
+        log_file.write(message + '\n')
+
     for region, city in regions.items():
         weather_data = get_weather_data(api_key, city)
         weather_reports.append(format_weather(region, weather_data))
@@ -56,19 +62,19 @@ def rtx_weather_report(request):
     outro = "Thank you for tuning in to the RTX Weather Report. Stay safe and have a great day!"
     full_report = f"{intro} {' '.join(weather_reports)} {outro}"
 
-    print(full_report)
+    log_message(full_report)
 
     engine = pyttsx3.init()
     engine.save_to_file(full_report, 'weather_report.wav')
     engine.runAndWait()
-    print("WAV file created!")
+    log_message("WAV file created!")
 
     try:
         sound = AudioSegment.from_wav("weather_report.wav")
         sound.export("weather_report.mp3", format="mp3")
-        print("MP3 file created successfully!")
+        log_message("MP3 file created successfully!")
     except Exception as e:
-        print(f"An error occurred during conversion: {e}")
+        log_message(f"An error occurred during conversion: {e}")
 
     def upload_to_azuracast(api_key, station_id, url, file_path):
         headers = {
@@ -77,7 +83,7 @@ def rtx_weather_report(request):
         files = {
             'file': open(file_path, 'rb')
         }
-        print(f"Uploading {file_path} to AzuraCast...")
+        log_message(f"Uploading {file_path} to AzuraCast...")
         try:
             response = requests.post(
                 f'{url}/api/station/{station_id}/files/upload',
@@ -85,12 +91,16 @@ def rtx_weather_report(request):
                 files=files
             )
             if response.status_code == 200:
-                print('File uploaded successfully to AzuraCast!')
+                log_message('File uploaded successfully to AzuraCast!')
             else:
-                print(f'Failed to upload file. Status code: {response.status_code}, Message: {response.text}')
+                log_message(f'Failed to upload file. Status code: {response.status_code}, Message: {response.text}')
         except Exception as e:
-            print(f"An error occurred during the upload: {e}")
+            log_message(f"An error occurred during the upload: {e}")
 
     upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'weather_report.mp3')
+    log_file.close()
     return 'Weather report generated and uploaded successfully!'
+
+if __name__ == "__main__":
+    rtx_weather_report(None)
 

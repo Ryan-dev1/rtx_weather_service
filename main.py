@@ -1,9 +1,7 @@
 import requests
-import pyttsx3
-from pydub import AudioSegment
+from gtts import gTTS
 from datetime import datetime
 import pytz
-import time
 
 def get_weather_data(api_key, city):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=imperial"
@@ -65,21 +63,10 @@ def rtx_weather_report(request):
 
     log_message(full_report)
 
-    engine = pyttsx3.init()
-    engine.save_to_file(full_report, 'weather_report.wav')
-    engine.runAndWait()
-    log_message("WAV file created!")
-
-    # Verify the duration of the WAV file before proceeding
-    try:
-        sound = AudioSegment.from_wav("weather_report.wav")
-        if sound.duration_seconds < 1:
-            raise Exception("The WAV file is too short, indicating an issue with saving the audio content.")
-        log_message(f"WAV file duration: {sound.duration_seconds} seconds")
-        sound.export("weather_report.mp3", format="mp3")
-        log_message("MP3 file created successfully!")
-    except Exception as e:
-        log_message(f"An error occurred during conversion: {e}")
+    # Generate MP3 file using gTTS
+    tts = gTTS(text=full_report, lang='en')
+    tts.save("weather_report.mp3")
+    log_message("MP3 file created successfully!")
 
     def upload_to_azuracast(api_key, station_id, url, file_path):
         headers = {
@@ -108,4 +95,3 @@ def rtx_weather_report(request):
 
 if __name__ == "__main__":
     rtx_weather_report(None)
-

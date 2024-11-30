@@ -3,6 +3,7 @@ import pyttsx3
 from pydub import AudioSegment
 from datetime import datetime
 import pytz
+import time
 
 def get_weather_data(api_key, city):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=imperial"
@@ -69,6 +70,8 @@ def rtx_weather_report(request):
     engine.runAndWait()
     log_message("WAV file created!")
 
+    time.sleep(5)  # Add a delay to ensure the file is fully written
+
     try:
         sound = AudioSegment.from_wav("weather_report.wav")
         sound.export("weather_report.mp3", format="mp3")
@@ -103,4 +106,3 @@ def rtx_weather_report(request):
 
 if __name__ == "__main__":
     rtx_weather_report(None)
-

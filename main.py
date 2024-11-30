@@ -61,11 +61,12 @@ def rtx_weather_report(request):
     engine = pyttsx3.init()
     engine.save_to_file(full_report, 'weather_report.wav')
     engine.runAndWait()
+    print("WAV file created!")  # Added this line
 
     try:
         sound = AudioSegment.from_wav("weather_report.wav")
         sound.export("weather_report.mp3", format="mp3")
-        print("MP3 file created successfully!")
+        print("MP3 file created successfully!")  # Added this line
     except Exception as e:
         print(f"An error occurred during conversion: {e}")
 
@@ -85,7 +86,7 @@ def rtx_weather_report(request):
             print('File uploaded successfully to AzuraCast!')
         else:
             print(f'Failed to upload file. Status code: {response.status_code}, Message: {response.text}')
+        print(response.text)  # Added this line
 
     upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'weather_report.mp3')
     return 'Weather report generated and uploaded successfully!'
-

@@ -12,8 +12,7 @@ def get_weather_data(api_key, city):
 
 def format_weather(region, weather_data):
     temp = weather_data['main']['temp']
-    condition = weather_data['weather'][0]['description']
-    forecast = f"In {region}, the current temperature is {temp}°F with {condition}."
+    condition is {temp}°F with {condition}."
     return forecast
 
 def get_time_of_day(hour):
@@ -37,23 +36,26 @@ def write_current_report(file_path, report_text):
     with open(file_path, 'w') as file:
         file.write(report_text)
 
-def delete_previous_mp3(api_key, station_id, url, folder):
+def delete_previous_mp3(api_key, station_id, url, playlist_id, log_message):
     headers = {
-        'Authorization': f'Bearer {api_key}'
+        'Authorization': f'Bearer 484aceb04796a5da:4be44d2637ccb37be7d213795d1b3f25'
     }
     try:
-        response = requests.get(f'{url}/api/station/{station_id}/files/list?directory={folder}', headers=headers)
+        response = requests.get(f'{url}/api/station/{station_id}/playlist/{playlist_id}/files', headers=headers)
+        log_message(f"Playlist files response: {response.status_code} {response.text}")
         if response.status_code == 200:
             files = response.json()
             if files:
                 # Assume the oldest file is the one to delete
                 oldest_file = sorted(files, key=lambda x: x['last_modified'])[0]['path']
+                log_message(f"Deleting oldest file from playlist: {oldest_file}")
                 response = requests.delete(f'{url}/api/station/{station_id}/files/delete', headers=headers, json={'files': [oldest_file]})
+                log_message(f"Delete response: {response.status_code} {response.text}")
                 if response.status_code == 200:
                     return True
         return False
     except Exception as e:
-        print(f"An error occurred while deleting the file: {e}")
+        log_message(f"An error occurred while deleting the file: {e}")
         return False
 
 def rtx_weather_report(request):
@@ -61,7 +63,7 @@ def rtx_weather_report(request):
     azura_api_key = '484aceb04796a5da:4be44d2637ccb37be7d213795d1b3f25'
     azura_station_id = '101'
     azura_url = 'https://azura.typicalmedia.net'
-    weather_reports_folder = 'Weather Reports'
+    playlist_id = '318'  # Updated with your playlist ID
     regions = {
         'the Northeast': 'New York',
         'the Midwest': 'Chicago',
@@ -117,32 +119,34 @@ def rtx_weather_report(request):
     # Clean up intermediate files
     os.remove("weather_report.mp3")
 
-    def upload_to_azuracast(api_key, station_id, url, file_path, folder):
+    def upload_to_azuracast(api_key, station_id, url, file_path, playlist_id, log_message):
         headers = {
             'Authorization': f'Bearer {api_key}'
         }
         files = {
             'file': open(file_path, 'rb')
         }
-        log_message(f"Uploading {file_path} to AzuraCast in {folder} folder...")
+        log_message(f"Uploading {file_path} to AzuraCast in playlist ID {playlist_id}...")
         try:
             response = requests.post(
-                f'{url}/api/station/{station_id}/files/upload?directory={folder}',
+                f'{url}/api/station/{station_id}/files/upload?playlists[]={playlist_id}',
                 headers=headers,
                 files=files
             )
+            log_message(f"Upload response: {response.status_code} {response.text}")
             if response.status_code == 200:
                 log_message('File uploaded successfully to AzuraCast!')
-                delete_previous_mp3(api_key, station_id, url, folder)  # Delete the oldest MP3 file
+                delete_previous_mp3(api_key, station_id, url, playlist_id, log_message)  # Delete the oldest MP3 file
             else:
                 log_message(f'Failed to upload file. Status code: {response.status_code}, Message: {response.text}')
         except Exception as e:
             log_message(f"An error occurred during the upload: {e}")
 
-    upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'final_weather_report.mp3', weather_reports_folder)
+    upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'final_weather_report.mp3', playlist_id, log_message)
     write_current_report(previous_report_file, full_report_text)
     log_file.close()
     return 'Weather report generated and uploaded successfully!'
 
 if __name__ == "__main__":
     rtx_weather_report(None)
+

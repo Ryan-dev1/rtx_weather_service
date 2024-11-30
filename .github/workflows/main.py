@@ -88,4 +88,4 @@ def rtx_weather_report(request):
 
     upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'weather_report.mp3')
     return 'Weather report generated and uploaded successfully!'
-
+# Test workflow trigger

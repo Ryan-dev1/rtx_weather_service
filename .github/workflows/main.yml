@@ -1,8 +1,9 @@
 name: Run Script
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # Runs every hour
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -29,4 +30,5 @@ jobs:
 
       - name: Run script
         run: python main.py
+
 

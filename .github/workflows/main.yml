@@ -32,12 +32,7 @@ jobs:
         run: python main.py
 
       - name: Upload log file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: log-file
           path: log.txt
-
-      - name: Run script
-        run: python main.py
-
-

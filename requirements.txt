@@ -2,3 +2,4 @@ requests
 pyttsx3
 pydub
 pytz
+gtts

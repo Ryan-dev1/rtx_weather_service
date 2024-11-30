@@ -68,13 +68,15 @@ def rtx_weather_report(request):
     engine = pyttsx3.init()
     engine.save_to_file(full_report, 'weather_report.wav')
     engine.runAndWait()
+    time.sleep(2)  # Add delay to ensure file is completely saved
     log_message("WAV file created!")
-
-    time.sleep(5)  # Add a delay to ensure the file is fully written
 
     try:
         sound = AudioSegment.from_wav("weather_report.wav")
+        if sound.duration_seconds < 1:
+            raise Exception("The WAV file is too short, indicating an issue with saving the audio content.")
         sound.export("weather_report.mp3", format="mp3")
+        time.sleep(2)  # Add delay to ensure file is completely saved
         log_message("MP3 file created successfully!")
     except Exception as e:
         log_message(f"An error occurred during conversion: {e}")
@@ -106,3 +108,4 @@ def rtx_weather_report(request):
 
 if __name__ == "__main__":
     rtx_weather_report(None)
+

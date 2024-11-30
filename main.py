@@ -93,7 +93,7 @@ def rtx_weather_report(request):
 
     intro = AudioSegment.from_mp3("rtx_weather_service_Intro.mp3")
     weather_text = f"The current time is {current_time} UTC. It's {time_of_day}. {' '.join(weather_reports)}"
-    full_report_text = f"{intro} {weather_text}"
+    full_report_text = f"RTX Radio - Weather Report {weather_text}"
 
     log_message(full_report_text)
 

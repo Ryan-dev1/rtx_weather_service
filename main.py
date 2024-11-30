@@ -2,6 +2,7 @@ import requests
 from gtts import gTTS
 from datetime import datetime
 import pytz
+from pydub import AudioSegment
 
 def get_weather_data(api_key, city):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=imperial"
@@ -52,21 +53,26 @@ def rtx_weather_report(request):
         weather_data = get_weather_data(api_key, city)
         weather_reports.append(format_weather(region, weather_data))
 
-    tz = pytz.timezone('America/Detroit')
+    tz = pytz.utc  # Set timezone to UTC
     now = datetime.now(tz)
     current_time = now.strftime("%I:%M %p")
     time_of_day = get_time_of_day(now.hour)
 
-    intro = f"This is an RTX Weather Report! Reporting on North American weather. The current time is {current_time} {now.tzname()}. It's {time_of_day}."
-    outro = "Thank you for tuning in to the RTX Weather Report. Stay safe and have a great day!"
-    full_report = f"{intro} {' '.join(weather_reports)} {outro}"
+    intro = AudioSegment.from_mp3("rtx_weather_service_Intro.mp3")
+    weather_text = f"The current time is {current_time} UTC. It's {time_of_day}. {' '.join(weather_reports)}"
 
-    log_message(full_report)
+    log_message(weather_text)
 
-    # Generate MP3 file using gTTS
-    tts = gTTS(text=full_report, lang='en')
+    # Generate the weather report MP3 file using gTTS
+    tts = gTTS(text=weather_text, lang='en')
     tts.save("weather_report.mp3")
     log_message("MP3 file created successfully!")
+
+    # Combine the intro and weather report
+    weather_report = AudioSegment.from_mp3("weather_report.mp3")
+    combined_report = intro + weather_report
+    combined_report.export("final_weather_report.mp3", format="mp3")
+    log_message("Final MP3 file created successfully!")
 
     def upload_to_azuracast(api_key, station_id, url, file_path):
         headers = {
@@ -89,9 +95,10 @@ def rtx_weather_report(request):
         except Exception as e:
             log_message(f"An error occurred during the upload: {e}")
 
-    upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'weather_report.mp3')
+    upload_to_azuracast(azura_api_key, azura_station_id, azura_url, 'final_weather_report.mp3')
     log_file.close()
     return 'Weather report generated and uploaded successfully!'
 
 if __name__ == "__main__":
     rtx_weather_report(None)
+

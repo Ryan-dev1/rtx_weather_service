@@ -12,7 +12,8 @@ def get_weather_data(api_key, city):
 
 def format_weather(region, weather_data):
     temp = weather_data['main']['temp']
-    condition is {temp}°F with {condition}."
+    condition = weather_data['weather'][0]['description']
+    forecast = f"In {region}, the current temperature is {temp}°F with {condition}."
     return forecast
 
 def get_time_of_day(hour):
@@ -149,4 +150,3 @@ def rtx_weather_report(request):
 
 if __name__ == "__main__":
     rtx_weather_report(None)
-

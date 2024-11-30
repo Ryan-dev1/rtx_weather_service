@@ -1,9 +1,8 @@
 name: Run Script
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '0 */2 * * *'  # Runs at 12:00, 2:00, 4:00, etc.
 
 jobs:
   build:

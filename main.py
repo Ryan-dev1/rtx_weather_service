@@ -146,4 +146,3 @@ def rtx_weather_report(request):
 
 if __name__ == "__main__":
     rtx_weather_report(None)
-

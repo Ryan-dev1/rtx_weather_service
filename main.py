@@ -1,8 +1,8 @@
+import os
 import requests
 from gtts import gTTS
 from datetime import datetime
 import pytz
-from pydub import AudioSegment
 
 def get_weather_data(api_key, city):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=imperial"
@@ -58,20 +58,15 @@ def rtx_weather_report(request):
     current_time = now.strftime("%I:%M %p")
     time_of_day = get_time_of_day(now.hour)
 
-    intro = AudioSegment.from_mp3("rtx_weather_service_Intro.mp3")
+    intro = "RTX Radio - Weather Report."
     weather_text = f"The current time is {current_time} UTC. It's {time_of_day}. {' '.join(weather_reports)}"
+    full_report_text = f"{intro} {weather_text}"
 
-    log_message(weather_text)
+    log_message(full_report_text)
 
-    # Generate the weather report MP3 file using gTTS
-    tts = gTTS(text=weather_text, lang='en')
-    tts.save("weather_report.mp3")
-    log_message("MP3 file created successfully!")
-
-    # Combine the intro and weather report
-    weather_report = AudioSegment.from_mp3("weather_report.mp3")
-    combined_report = intro + weather_report
-    combined_report.export("final_weather_report.mp3", format="mp3")
+    # Generate the full weather report MP3 file using gTTS
+    tts = gTTS(text=full_report_text, lang='en')
+    tts.save("final_weather_report.mp3")
     log_message("Final MP3 file created successfully!")
 
     def upload_to_azuracast(api_key, station_id, url, file_path):
